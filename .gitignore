@@ -16,3 +16,4 @@
 /src/backend/TaskManagement/TaskManagement.Service/bin/Debug/net8.0
 /src/backend/TaskManagement/TaskManagement.Tests.Integration/bin/Debug/net8.0
 /src/backend/TaskManagement/TaskManagement.Tests.Unit/bin/Debug/net8.0
+/src/backend/TaskManagement/TaskManagement.Migrations/obj/Debug/net8.0
