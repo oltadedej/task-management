@@ -1,21 +1,109 @@
-﻿################################################################################
-# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
-################################################################################
+﻿# =========================
+# Build results
+# =========================
+bin/
+obj/
+[Bb]in/
+[Oo]bj/
 
-/.vs
-/src/backend/TaskManagement/.vs/TaskManagement
-/src/backend/TaskManagement/TaskManagement.Api/obj
-/src/backend/TaskManagement/TaskManagement.Domain/obj
-/src/backend/TaskManagement/TaskManagement.Infrastructure/obj
-/src/backend/TaskManagement/TaskManagement.Service/obj
-/src/backend/TaskManagement/TaskManagement.Tests.Integration/obj
-/src/backend/TaskManagement/TaskManagement.Tests.Unit/obj
-/src/backend/TaskManagement/TaskManagement.Api
-/src/backend/TaskManagement/TaskManagement.Domain
-/src/backend/TaskManagement/TaskManagement.Infrastructure
-/src/backend/TaskManagement/TaskManagement.Service/bin/Debug/net8.0
-/src/backend/TaskManagement/TaskManagement.Tests.Integration/bin/Debug/net8.0
-/src/backend/TaskManagement/TaskManagement.Tests.Unit/bin/Debug/net8.0
-/src/backend/TaskManagement/TaskManagement.Migrations/obj/Debug/net8.0
-/src/backend/TaskManagement/TaskManagement.Migrations/obj
-/src/backend/TaskManagement/.vs/ProjectEvaluation
+# =========================
+# Visual Studio
+# =========================
+.vs/
+*.user
+*.userosscache
+*.suo
+*.rsuser
+*.userprefs
+
+# =========================
+# Visual Studio Code / Cursor
+# =========================
+.vscode/
+.cursor/
+*.code-workspace
+
+# =========================
+# Rider / JetBrains
+# =========================
+.idea/
+*.sln.iml
+
+# =========================
+# .NET
+# =========================
+project.lock.json
+project.fragment.lock.json
+artifacts/
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+
+# =========================
+# Logs
+# =========================
+*.log
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# =========================
+# Environment / secrets
+# =========================
+.env
+.env.*
+secrets.json
+appsettings.*.json
+!appsettings.json
+
+# =========================
+# Certificates
+# =========================
+*.pfx
+*.cer
+*.crt
+*.key
+
+# =========================
+# Coverage & Test results
+# =========================
+TestResults/
+coverage/
+coverage.cobertura.xml
+*.coverage
+*.coveragexml
+
+# =========================
+# Publish output
+# =========================
+publish/
+wwwroot/dist/
+
+# =========================
+# Docker
+# =========================
+docker-compose.override.yml
+
+# =========================
+# Temporary files
+# =========================
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+
+# =========================
+# Node (if frontend included)
+# =========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
