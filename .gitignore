@@ -10,3 +10,9 @@
 /src/backend/TaskManagement/TaskManagement.Service/obj
 /src/backend/TaskManagement/TaskManagement.Tests.Integration/obj
 /src/backend/TaskManagement/TaskManagement.Tests.Unit/obj
+/src/backend/TaskManagement/TaskManagement.Api
+/src/backend/TaskManagement/TaskManagement.Domain
+/src/backend/TaskManagement/TaskManagement.Infrastructure
+/src/backend/TaskManagement/TaskManagement.Service/bin/Debug/net8.0
+/src/backend/TaskManagement/TaskManagement.Tests.Integration/bin/Debug/net8.0
+/src/backend/TaskManagement/TaskManagement.Tests.Unit/bin/Debug/net8.0
