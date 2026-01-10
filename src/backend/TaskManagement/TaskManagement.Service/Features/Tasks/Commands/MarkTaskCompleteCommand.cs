@@ -13,4 +13,3 @@ public class MarkTaskCompleteCommand : IRequest<TaskDto>
     /// </summary>
     public Guid Id { get; set; }
 }
-

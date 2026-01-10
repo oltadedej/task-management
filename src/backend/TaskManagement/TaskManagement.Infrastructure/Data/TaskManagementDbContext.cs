@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using TaskManagement.Domain.Entities;
 
 namespace TaskManagement.Infrastructure.Data;
 

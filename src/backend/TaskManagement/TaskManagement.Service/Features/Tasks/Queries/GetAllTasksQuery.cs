@@ -9,4 +9,3 @@ namespace TaskManagement.Service.Features.Tasks.Queries;
 public class GetAllTasksQuery : IRequest<IEnumerable<TaskDto>>
 {
 }
-

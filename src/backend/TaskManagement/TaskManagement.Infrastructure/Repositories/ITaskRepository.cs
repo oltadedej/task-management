@@ -1,5 +1,4 @@
 using TaskManagement.Domain.Entities;
-using TaskManagement.Domain.Enums;
 using TaskStatus = TaskManagement.Domain.Enums.TaskStatus;
 
 namespace TaskManagement.Infrastructure.Repositories;
@@ -59,4 +58,3 @@ public interface ITaskRepository
     /// <returns>The number of state entries written to the database.</returns>
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
-

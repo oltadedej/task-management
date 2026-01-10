@@ -1,5 +1,4 @@
 using MediatR;
-using TaskManagement.Domain.Enums;
 using TaskManagement.Service.Models.Dtos;
 using TaskStatus = TaskManagement.Domain.Enums.TaskStatus;
 
@@ -15,4 +14,3 @@ public class GetTasksByStatusQuery : IRequest<IEnumerable<TaskDto>>
     /// </summary>
     public TaskStatus Status { get; set; }
 }
-

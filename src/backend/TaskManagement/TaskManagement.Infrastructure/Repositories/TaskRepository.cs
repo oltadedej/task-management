@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using TaskManagement.Domain.Entities;
-using TaskManagement.Domain.Enums;
 using TaskManagement.Infrastructure.Data;
 using TaskStatus = TaskManagement.Domain.Enums.TaskStatus;
 
@@ -86,4 +85,3 @@ public class TaskRepository : ITaskRepository
         return await _context.SaveChangesAsync(cancellationToken);
     }
 }
-

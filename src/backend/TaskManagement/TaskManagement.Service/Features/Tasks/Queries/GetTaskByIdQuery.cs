@@ -13,4 +13,3 @@ public class GetTaskByIdQuery : IRequest<TaskDto?>
     /// </summary>
     public Guid Id { get; set; }
 }
-

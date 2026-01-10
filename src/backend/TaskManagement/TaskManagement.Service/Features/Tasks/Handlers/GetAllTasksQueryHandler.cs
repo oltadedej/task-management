@@ -1,6 +1,5 @@
 using AutoMapper;
 using MediatR;
-using TaskManagement.Domain.Entities;
 using TaskManagement.Infrastructure.Repositories;
 using TaskManagement.Service.Features.Tasks.Queries;
 using TaskManagement.Service.Models.Dtos;

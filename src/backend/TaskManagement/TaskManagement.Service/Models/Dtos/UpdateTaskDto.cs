@@ -20,4 +20,3 @@ public class UpdateTaskDto
     /// </summary>
     public DateTime? DueDate { get; set; }
 }
-

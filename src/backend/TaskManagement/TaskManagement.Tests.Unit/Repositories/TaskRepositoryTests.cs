@@ -1,10 +1,7 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using TaskManagement.Domain.Entities;
-using TaskManagement.Domain.Enums;
 using TaskManagement.Infrastructure.Data;
 using TaskManagement.Infrastructure.Repositories;
-using Xunit;
 using ManagementTask = TaskManagement.Domain.Entities.ManagementTask;
 using TaskStatus = TaskManagement.Domain.Enums.TaskStatus;
 

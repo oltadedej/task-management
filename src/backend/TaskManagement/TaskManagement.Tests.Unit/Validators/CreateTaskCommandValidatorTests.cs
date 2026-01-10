@@ -1,7 +1,6 @@
 using FluentAssertions;
 using TaskManagement.Service.Features.Tasks.Commands;
 using TaskManagement.Service.Features.Tasks.Validators;
-using Xunit;
 
 namespace TaskManagement.Tests.Unit.Validators;
 

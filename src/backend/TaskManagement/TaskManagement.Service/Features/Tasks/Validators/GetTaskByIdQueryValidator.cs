@@ -18,4 +18,3 @@ public class GetTaskByIdQueryValidator : AbstractValidator<GetTaskByIdQuery>
             .WithMessage("Task ID is required.");
     }
 }
-

@@ -1,16 +1,10 @@
 using AutoMapper;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
 using Moq;
-using TaskManagement.Domain.Entities;
-using TaskManagement.Domain.Enums;
-using TaskManagement.Infrastructure.Data;
 using TaskManagement.Infrastructure.Repositories;
 using TaskManagement.Service.Features.Tasks.Commands;
 using TaskManagement.Service.Features.Tasks.Handlers;
 using TaskManagement.Service.Mappings;
-using TaskManagement.Service.Models.Dtos;
-using Xunit;
 using ManagementTask = TaskManagement.Domain.Entities.ManagementTask;
 using TaskStatus = TaskManagement.Domain.Enums.TaskStatus;
 

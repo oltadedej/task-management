@@ -1,7 +1,6 @@
 using AutoMapper;
 using MediatR;
 using TaskManagement.Domain.Entities;
-using TaskManagement.Domain.Enums;
 using TaskManagement.Infrastructure.Repositories;
 using TaskManagement.Service.Features.Tasks.Commands;
 using TaskManagement.Service.Models.Dtos;
@@ -43,4 +42,3 @@ public class CreateTaskCommandHandler : IRequestHandler<CreateTaskCommand, TaskD
         return _mapper.Map<TaskDto>(task);
     }
 }
-

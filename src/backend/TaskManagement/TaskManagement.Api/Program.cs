@@ -3,7 +3,6 @@ using Asp.Versioning.ApiExplorer;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 using TaskManagement.Domain.Exceptions;
