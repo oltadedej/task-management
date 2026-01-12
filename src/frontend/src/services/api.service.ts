@@ -56,8 +56,40 @@ class ApiService {
       },
       (error: AxiosError) => {
         console.error('[API Response Error]', error);
+        
+        let userMessage = 'An unexpected error occurred';
+        
+        if (error.response) {
+          // Server responded with an error status
+          const status = error.response.status;
+          const responseData = error.response.data as { message?: string } | undefined;
+          
+          switch (status) {
+            case 400:
+              userMessage = responseData?.message || 'Invalid request. Please check your input and try again.';
+              break;
+            case 404:
+              userMessage = responseData?.message || 'The requested resource was not found.';
+              break;
+            case 500:
+              userMessage = 'Server error. Please try again later or contact support if the problem persists.';
+              break;
+            case 503:
+              userMessage = 'Service is temporarily unavailable. Please try again later.';
+              break;
+            default:
+              userMessage = responseData?.message || `An error occurred (${status}). Please try again.`;
+          }
+        } else if (error.request) {
+          // Request was made but no response received
+          userMessage = 'Unable to connect to the server. Please check your internet connection and try again.';
+        } else {
+          // Something happened in setting up the request
+          userMessage = error.message || 'An unexpected error occurred while processing your request.';
+        }
+        
         const apiError = new ApiError(
-          error.response?.data?.message || error.message || 'An unexpected error occurred',
+          userMessage,
           error.response?.status,
           error.response?.data
         );

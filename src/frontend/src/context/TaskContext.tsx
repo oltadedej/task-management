@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { TaskDto, CreateTaskDto, UpdateTaskDto, TaskStatus } from '../types/task.types';
 import { apiService, ApiError } from '../services/api.service';
+import { useNotification } from './NotificationContext';
 
 /**
  * State interface for the task context.
@@ -47,6 +48,8 @@ interface TaskProviderProps {
  * Manages task state and provides actions for CRUD operations.
  */
 export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
+  const { showError, showSuccess } = useNotification();
+  
   const [state, setState] = useState<TaskContextState>({
     tasks: [],
     loading: false,
@@ -74,9 +77,10 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     } catch (err) {
       const error = err instanceof ApiError ? err.message : 'Failed to fetch tasks';
       setError(error);
+      showError(error);
       setLoading(false);
     }
-  }, [setLoading, setError]);
+  }, [setLoading, setError, showError]);
 
   /**
    * Fetch a task by ID.
@@ -91,10 +95,11 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     } catch (err) {
       const error = err instanceof ApiError ? err.message : 'Failed to fetch task';
       setError(error);
+      showError(error);
       setLoading(false);
       return null;
     }
-  }, [setLoading, setError]);
+  }, [setLoading, setError, showError]);
 
   /**
    * Fetch tasks filtered by status.
@@ -113,9 +118,10 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     } catch (err) {
       const error = err instanceof ApiError ? err.message : 'Failed to fetch tasks by status';
       setError(error);
+      showError(error);
       setLoading(false);
     }
-  }, [setLoading, setError]);
+  }, [setLoading, setError, showError]);
 
   /**
    * Create a new task.
@@ -130,14 +136,16 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
         tasks: [newTask, ...prev.tasks],
         loading: false,
       }));
+      showSuccess('Task created successfully!');
       return newTask;
     } catch (err) {
       const error = err instanceof ApiError ? err.message : 'Failed to create task';
       setError(error);
+      showError(error);
       setLoading(false);
       return null;
     }
-  }, [setLoading, setError]);
+  }, [setLoading, setError, showError, showSuccess]);
 
   /**
    * Update an existing task.
@@ -155,14 +163,16 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
         tasks: prev.tasks.map((t) => (t.id === id ? updatedTask : t)),
         loading: false,
       }));
+      showSuccess('Task updated successfully!');
       return updatedTask;
     } catch (err) {
       const error = err instanceof ApiError ? err.message : 'Failed to update task';
       setError(error);
+      showError(error);
       setLoading(false);
       return null;
     }
-  }, [setLoading, setError]);
+  }, [setLoading, setError, showError, showSuccess]);
 
   /**
    * Delete a task.
@@ -177,14 +187,16 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
         tasks: prev.tasks.filter((t) => t.id !== id),
         loading: false,
       }));
+      showSuccess('Task deleted successfully!');
       return true;
     } catch (err) {
       const error = err instanceof ApiError ? err.message : 'Failed to delete task';
       setError(error);
+      showError(error);
       setLoading(false);
       return false;
     }
-  }, [setLoading, setError]);
+  }, [setLoading, setError, showError, showSuccess]);
 
   /**
    * Mark a task as complete.
@@ -199,14 +211,16 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
         tasks: prev.tasks.map((t) => (t.id === id ? updatedTask : t)),
         loading: false,
       }));
+      showSuccess('Task marked as complete!');
       return true;
     } catch (err) {
       const error = err instanceof ApiError ? err.message : 'Failed to mark task as complete';
       setError(error);
+      showError(error);
       setLoading(false);
       return false;
     }
-  }, [setLoading, setError]);
+  }, [setLoading, setError, showError, showSuccess]);
 
   /**
    * Mark a task as incomplete (Not Started).
@@ -221,14 +235,16 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
         tasks: prev.tasks.map((t) => (t.id === id ? updatedTask : t)),
         loading: false,
       }));
+      showSuccess('Task marked as incomplete!');
       return true;
     } catch (err) {
       const error = err instanceof ApiError ? err.message : 'Failed to mark task as incomplete';
       setError(error);
+      showError(error);
       setLoading(false);
       return false;
     }
-  }, [setLoading, setError]);
+  }, [setLoading, setError, showError, showSuccess]);
 
   /**
    * Set the status filter.
