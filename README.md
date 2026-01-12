@@ -33,7 +33,7 @@ src/
 
 ### Backend
 
-To run the backend API locally, please refer to the [Backend README](./backend/TaskManagement/README.md) for detailed instructions.
+To run the backend API locally, please refer to the [Backend README](./src/backend/TaskManagement/README.md) for detailed instructions.
 
 **Quick Start:**
 1. Navigate to `src/backend/TaskManagement`
@@ -45,7 +45,7 @@ The API will be available at `https://localhost:7027` with Swagger documentation
 
 ### Frontend
 
-To run the frontend application locally, please refer to the [Frontend README](./frontend/README.md) for detailed instructions.
+To run the frontend application locally, please refer to the [Frontend README](./src/frontend/README.md) for detailed instructions.
 
 **Quick Start:**
 1. Navigate to `src/frontend`
@@ -149,8 +149,8 @@ When contributing to this project:
 
 ## Additional Resources
 
-- [Backend Documentation](./backend/TaskManagement/README.md) - Detailed backend setup and API documentation
-- [Frontend Documentation](./frontend/README.md) - Detailed frontend setup and development guide
+- [Backend Documentation](./src/backend/TaskManagement/README.md) - Detailed backend setup and API documentation
+- [Frontend Documentation](./src/frontend/README.md) - Detailed frontend setup and development guide
 
 ## License
 
