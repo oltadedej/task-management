@@ -5,6 +5,10 @@ bin/
 obj/
 [Bb]in/
 [Oo]bj/
+**/bin/
+**/obj/
+**/Bin/
+**/Obj/
 
 # =========================
 # Visual Studio
@@ -15,6 +19,9 @@ obj/
 *.suo
 *.rsuser
 *.userprefs
+*.csproj.user
+*.vbproj.user
+*.fsproj.user
 
 # =========================
 # Visual Studio Code / Cursor
@@ -22,12 +29,14 @@ obj/
 .vscode/
 .cursor/
 *.code-workspace
+.history/
 
 # =========================
 # Rider / JetBrains
 # =========================
 .idea/
 *.sln.iml
+*.iml
 
 # =========================
 # .NET
@@ -39,28 +48,58 @@ artifacts/
 *.snupkg
 .nuget/
 packages/
+project.assets.json
+project.nuget.cache
+*.csproj.nuget.dgspec.json
+*.csproj.nuget.g.props
+*.csproj.nuget.g.targets
+*.csproj.EntityFrameworkCore.targets
+
+# =========================
+# Database files
+# =========================
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
 
 # =========================
 # Logs
 # =========================
 *.log
+logs/
+**/*.log
 
 # =========================
 # OS files
 # =========================
 .DS_Store
-Thumbs.db
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
 ehthumbs.db
+Thumbs.db
 Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
 
 # =========================
 # Environment / secrets
 # =========================
 .env
 .env.*
+!.env.example
 secrets.json
 appsettings.*.json
 !appsettings.json
+!appsettings.Development.json.example
 
 # =========================
 # Certificates
@@ -69,26 +108,33 @@ appsettings.*.json
 *.cer
 *.crt
 *.key
+*.p12
 
 # =========================
 # Coverage & Test results
 # =========================
 TestResults/
+[Tt]est[Rr]esult*/
 coverage/
 coverage.cobertura.xml
 *.coverage
 *.coveragexml
+*.trx
+*.testlog
 
 # =========================
 # Publish output
 # =========================
 publish/
 wwwroot/dist/
+**/publish/
+**/wwwroot/dist/
 
 # =========================
 # Docker
 # =========================
 docker-compose.override.yml
+.dockerignore
 
 # =========================
 # Temporary files
@@ -98,12 +144,77 @@ docker-compose.override.yml
 *.bak
 *.swp
 *.swo
+*~
+*.cache
 
 # =========================
-# Node (if frontend included)
+# Node.js / Frontend
 # =========================
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Frontend build outputs
+dist/
+dist-ssr/
+build/
+.vite/
+.vercel/
+.netlify/
+.next/
+out/
+.nuxt/
+.cache/
+.parcel-cache/
+
+# Frontend dependencies
+.npm/
+.yarn/
+.pnp.*
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# Frontend environment
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# =========================
+# TypeScript
+# =========================
+*.tsbuildinfo
+.tsbuildinfo
+
+# =========================
+# Python (if any scripts)
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# =========================
+# Miscellaneous
+# =========================
+*.orig
+*.rej
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
