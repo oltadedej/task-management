@@ -1,0 +1,173 @@
+name: CI
+
+on:
+  push:
+    branches: [ '*' ]
+  pull_request:
+    branches: [ '*' ]
+
+jobs:
+  backend-build:
+    name: Backend Build
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      
+      - name: Restore dependencies
+        working-directory: src/backend/TaskManagement
+        run: dotnet restore
+      
+      - name: Build solution
+        working-directory: src/backend/TaskManagement
+        run: dotnet build --no-restore --configuration Release
+
+  backend-unit-tests:
+    name: Backend Unit Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      
+      - name: Restore dependencies
+        working-directory: src/backend/TaskManagement
+        run: dotnet restore
+      
+      - name: Build solution
+        working-directory: src/backend/TaskManagement
+        run: dotnet build --no-restore --configuration Release
+      
+      - name: Run unit tests
+        working-directory: src/backend/TaskManagement
+        run: dotnet test TaskManagement.Tests.Unit/TaskManagement.Tests.Unit.csproj --no-build --verbosity normal --configuration Release
+
+  backend-integration-tests:
+    name: Backend Integration Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      
+      - name: Restore dependencies
+        working-directory: src/backend/TaskManagement
+        run: dotnet restore
+      
+      - name: Build solution
+        working-directory: src/backend/TaskManagement
+        run: dotnet build --no-restore --configuration Release
+      
+      - name: Run integration tests
+        working-directory: src/backend/TaskManagement
+        run: dotnet test TaskManagement.Tests.Integration/TaskManagement.Tests.Integration.csproj --no-build --verbosity normal --configuration Release
+
+  frontend-build:
+    name: Frontend Build
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+          cache: 'npm'
+          cache-dependency-path: src/frontend/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: src/frontend
+        run: npm ci
+      
+      - name: Build frontend
+        working-directory: src/frontend
+        run: npm run build
+
+  notify-failure:
+    name: Notify on Failure
+    runs-on: ubuntu-latest
+    if: always() && (needs.backend-build.result == 'failure' || needs.backend-unit-tests.result == 'failure' || needs.backend-integration-tests.result == 'failure' || needs.frontend-build.result == 'failure')
+    needs: [backend-build, backend-unit-tests, backend-integration-tests, frontend-build]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      
+      - name: Get commit info
+        id: commit
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            AUTHOR_EMAIL="${{ github.event.pull_request.user.email }}"
+            AUTHOR_NAME="${{ github.event.pull_request.user.login }}"
+          else
+            AUTHOR_EMAIL=$(git log -1 --pretty=format:'%ae' 2>/dev/null || echo '')
+            AUTHOR_NAME=$(git log -1 --pretty=format:'%an' 2>/dev/null || echo 'Unknown')
+          fi
+          
+          # Build recipient list - always include dedejolta@gmail.com, add author email if available
+          if [ -n "$AUTHOR_EMAIL" ] && [ "$AUTHOR_EMAIL" != "null" ]; then
+            RECIPIENTS="dedejolta@gmail.com, $AUTHOR_EMAIL"
+          else
+            RECIPIENTS="dedejolta@gmail.com"
+          fi
+          
+          echo "author=$AUTHOR_NAME" >> $GITHUB_OUTPUT
+          echo "email=$AUTHOR_EMAIL" >> $GITHUB_OUTPUT
+          echo "recipients=$RECIPIENTS" >> $GITHUB_OUTPUT
+          echo "message=$(git log -1 --pretty=format:'%s' 2>/dev/null || echo 'N/A')" >> $GITHUB_OUTPUT
+          echo "sha=$(git rev-parse --short HEAD 2>/dev/null || echo 'N/A')" >> $GITHUB_OUTPUT
+      
+      - name: Send email notification
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "❌ CI Pipeline Failed - ${{ github.repository }}"
+          to: ${{ steps.commit.outputs.recipients }}
+          from: ${{ secrets.SMTP_FROM }}
+          body: |
+            <h2>CI Pipeline Failed</h2>
+            <p>The CI pipeline has failed for the following commit:</p>
+            <ul>
+              <li><strong>Repository:</strong> ${{ github.repository }}</li>
+              <li><strong>Branch:</strong> ${{ github.ref_name }}</li>
+              <li><strong>Commit:</strong> ${{ steps.commit.outputs.sha }}</li>
+              <li><strong>Author:</strong> ${{ steps.commit.outputs.author }} (${{ steps.commit.outputs.email }})</li>
+              <li><strong>Message:</strong> ${{ steps.commit.outputs.message }}</li>
+              <li><strong>Workflow:</strong> ${{ github.workflow }}</li>
+              <li><strong>Run ID:</strong> ${{ github.run_id }}</li>
+            </ul>
+            
+            <h3>Job Results:</h3>
+            <ul>
+              <li>Backend Build: <strong>${{ needs.backend-build.result }}</strong></li>
+              <li>Backend Unit Tests: <strong>${{ needs.backend-unit-tests.result }}</strong></li>
+              <li>Backend Integration Tests: <strong>${{ needs.backend-integration-tests.result }}</strong></li>
+              <li>Frontend Build: <strong>${{ needs.frontend-build.result }}</strong></li>
+            </ul>
+            
+            <p><a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">View the failed workflow run</a></p>
+          content_type: text/html
+
