@@ -16,7 +16,7 @@ interface TaskCardProps {
  * Accessible and responsive design.
  */
 export const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit }) => {
-  const { markTaskComplete, markTaskIncomplete, deleteTask } = useTaskContext();
+  const { markTaskComplete, markTaskIncomplete, markTaskInProgress, deleteTask } = useTaskContext();
   const statusInfo = TaskStatusMap[task.status];
   const dueDate = task.dueDate ? new Date(task.dueDate) : null;
   const isOverdue = dueDate && dueDate < new Date() && task.status !== TaskStatus.Completed;
@@ -27,6 +27,10 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit }) => {
     } else {
       await markTaskComplete(task.id);
     }
+  };
+
+  const handleMarkInProgress = async () => {
+    await markTaskInProgress(task.id);
   };
 
   const handleDelete = async () => {
@@ -105,6 +109,15 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit }) => {
       </div>
 
       <div className="flex flex-wrap gap-2 pt-4 border-t border-gray-200">
+        {task.status !== TaskStatus.InProgress && (
+          <button
+            onClick={handleMarkInProgress}
+            className="px-4 py-2 rounded-md text-sm font-medium bg-primary-100 text-primary-700 hover:bg-primary-200 transition-colors duration-200"
+            aria-label="Mark task as in progress"
+          >
+            Mark In Progress
+          </button>
+        )}
         <button
           onClick={handleToggleComplete}
           className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${

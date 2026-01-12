@@ -5,7 +5,7 @@ A modern, responsive, and accessible React TypeScript application for managing t
 ## Features
 
 - ✅ **Full CRUD Operations**: Create, read, update, and delete tasks
-- ✅ **Status Management**: Mark tasks as complete or incomplete
+- ✅ **Status Management**: Mark tasks as complete, incomplete, or in progress
 - ✅ **Status Filtering**: Filter tasks by status (Not Started, In Progress, Completed)
 - ✅ **Responsive Design**: Works seamlessly on desktop, tablet, and mobile devices
 - ✅ **Accessible UI**: Built with accessibility in mind (ARIA labels, keyboard navigation, screen reader support)

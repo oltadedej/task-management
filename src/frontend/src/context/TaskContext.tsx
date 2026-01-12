@@ -25,6 +25,7 @@ interface TaskContextActions {
   deleteTask: (id: string) => Promise<boolean>;
   markTaskComplete: (id: string) => Promise<boolean>;
   markTaskIncomplete: (id: string) => Promise<boolean>;
+  markTaskInProgress: (id: string) => Promise<boolean>;
   setStatusFilter: (status: TaskStatus | null) => void;
   clearError: () => void;
 }
@@ -247,6 +248,30 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
   }, [setLoading, setError, showError, showSuccess]);
 
   /**
+   * Mark a task as in progress.
+   */
+  const markTaskInProgress = useCallback(async (id: string): Promise<boolean> => {
+    setLoading(true);
+    setError(null);
+    try {
+      const updatedTask = await apiService.markTaskInProgress(id);
+      setState((prev) => ({
+        ...prev,
+        tasks: prev.tasks.map((t) => (t.id === id ? updatedTask : t)),
+        loading: false,
+      }));
+      showSuccess('Task marked as in progress!');
+      return true;
+    } catch (err) {
+      const error = err instanceof ApiError ? err.message : 'Failed to mark task as in progress';
+      setError(error);
+      showError(error);
+      setLoading(false);
+      return false;
+    }
+  }, [setLoading, setError, showError, showSuccess]);
+
+  /**
    * Set the status filter.
    */
   const setStatusFilter = useCallback((status: TaskStatus | null) => {
@@ -270,6 +295,7 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     deleteTask,
     markTaskComplete,
     markTaskIncomplete,
+    markTaskInProgress,
     setStatusFilter,
     clearError,
   };

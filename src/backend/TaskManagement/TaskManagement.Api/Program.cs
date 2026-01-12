@@ -350,6 +350,32 @@ apiV1.MapPatch("/tasks/{id:guid}/incomplete", async (Guid id, IMediator mediator
 .WithSummary("Mark task as incomplete")
 .WithDescription("Marks a task as incomplete (not started), changing its status to NotStarted.");
 
+// Mark task as in progress
+apiV1.MapPatch("/tasks/{id:guid}/inprogress", async (Guid id, IMediator mediator, CancellationToken cancellationToken) =>
+{
+    var command = new MarkTaskInProgressCommand { Id = id };
+
+    try
+    {
+        var result = await mediator.Send(command, cancellationToken);
+        return Results.Ok(result);
+    }
+    catch (TaskNotFoundException ex)
+    {
+        return Results.NotFound(new { message = ex.Message });
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem(detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError);
+    }
+})
+.WithName("MarkTaskInProgress")
+.WithTags("Tasks")
+.Produces<TaskDto>(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status404NotFound)
+.WithSummary("Mark task as in progress")
+.WithDescription("Marks a task as in progress, changing its status to InProgress.");
+
 // Health check endpoint
 app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }))
     .WithName("HealthCheck")

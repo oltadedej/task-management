@@ -526,7 +526,36 @@ PATCH /api/v1/tasks/{id}/incomplete
 }
 ```
 
-#### 9. Health Check
+#### 9. Mark Task as In Progress
+
+```http
+PATCH /api/v1/tasks/{id}/inprogress
+```
+
+**Parameters:**
+- `id` (Guid) - Task identifier
+
+**Response (200 OK):**
+```json
+{
+  "id": "guid",
+  "title": "Task Title",
+  "description": "Task Description",
+  "status": 1,
+  "createdAt": "2026-01-01T00:00:00Z",
+  "updatedAt": "2026-01-02T00:00:00Z",
+  "dueDate": "2026-01-15T00:00:00Z"
+}
+```
+
+**Response (404 Not Found):**
+```json
+{
+  "message": "Task with ID {id} was not found."
+}
+```
+
+#### 10. Health Check
 
 ```http
 GET /health

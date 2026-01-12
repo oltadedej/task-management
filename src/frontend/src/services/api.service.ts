@@ -160,6 +160,14 @@ class ApiService {
     const response = await this.axiosInstance.patch<TaskDto>(`/tasks/${id}/incomplete`);
     return response.data;
   }
+
+  /**
+   * Mark a task as in progress.
+   */
+  async markTaskInProgress(id: string): Promise<TaskDto> {
+    const response = await this.axiosInstance.patch<TaskDto>(`/tasks/${id}/inprogress`);
+    return response.data;
+  }
 }
 
 // Export a singleton instance
