@@ -191,10 +191,17 @@ public class TasksApiTests : IClassFixture<CustomWebApplicationFactory>, IDispos
         };
 
         var createResponse = await _client.PostAsJsonAsync("/api/v1/tasks", createTaskDto);
+        createResponse.EnsureSuccessStatusCode();
         var createdTask = await createResponse.Content.ReadFromJsonAsync<TaskDto>(_jsonOptions);
+        createdTask.Should().NotBeNull();
+        createdTask!.Id.Should().NotBeEmpty();
+
+        // Verify task exists before deletion
+        var verifyResponse = await _client.GetAsync($"/api/v1/tasks/{createdTask.Id}");
+        verifyResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
         // Act
-        var response = await _client.DeleteAsync($"/api/v1/tasks/{createdTask!.Id}");
+        var response = await _client.DeleteAsync($"/api/v1/tasks/{createdTask.Id}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -243,6 +250,94 @@ public class TasksApiTests : IClassFixture<CustomWebApplicationFactory>, IDispos
     }
 
     [Fact]
+    public async Task MarkTaskInProgress_ShouldReturnOk_WhenTaskExists()
+    {
+        // Arrange
+        await CleanupDatabase();
+        var createTaskDto = new CreateTaskDto
+        {
+            Title = "Task to Mark In Progress",
+            Description = "Description"
+        };
+
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/tasks", createTaskDto);
+        var createdTask = await createResponse.Content.ReadFromJsonAsync<TaskDto>(_jsonOptions);
+
+        // Act
+        var response = await _client.PatchAsync($"/api/v1/tasks/{createdTask!.Id}/inprogress", null);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var inProgressTask = await response.Content.ReadFromJsonAsync<TaskDto>(_jsonOptions);
+        inProgressTask.Should().NotBeNull();
+        inProgressTask!.Status.Should().Be(TaskStatus.InProgress);
+    }
+
+    [Fact]
+    public async Task MarkTaskInProgress_ShouldReturnNotFound_WhenTaskDoesNotExist()
+    {
+        // Arrange
+        await CleanupDatabase();
+        var nonExistentId = Guid.NewGuid();
+
+        // Act
+        var response = await _client.PatchAsync($"/api/v1/tasks/{nonExistentId}/inprogress", null);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task MarkTaskInProgress_ShouldChangeStatusFromNotStartedToInProgress()
+    {
+        // Arrange
+        await CleanupDatabase();
+        var createTaskDto = new CreateTaskDto
+        {
+            Title = "Not Started Task",
+            Description = "Description"
+        };
+
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/tasks", createTaskDto);
+        var createdTask = await createResponse.Content.ReadFromJsonAsync<TaskDto>(_jsonOptions);
+        createdTask!.Status.Should().Be(TaskStatus.NotStarted);
+
+        // Act
+        var response = await _client.PatchAsync($"/api/v1/tasks/{createdTask.Id}/inprogress", null);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var inProgressTask = await response.Content.ReadFromJsonAsync<TaskDto>(_jsonOptions);
+        inProgressTask!.Status.Should().Be(TaskStatus.InProgress);
+    }
+
+    [Fact]
+    public async Task MarkTaskInProgress_ShouldChangeStatusFromCompletedToInProgress()
+    {
+        // Arrange
+        await CleanupDatabase();
+        var createTaskDto = new CreateTaskDto
+        {
+            Title = "Completed Task",
+            Description = "Description"
+        };
+
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/tasks", createTaskDto);
+        var createdTask = await createResponse.Content.ReadFromJsonAsync<TaskDto>(_jsonOptions);
+
+        // Mark as completed first
+        await _client.PatchAsync($"/api/v1/tasks/{createdTask!.Id}/complete", null);
+
+        // Act
+        var response = await _client.PatchAsync($"/api/v1/tasks/{createdTask.Id}/inprogress", null);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var inProgressTask = await response.Content.ReadFromJsonAsync<TaskDto>(_jsonOptions);
+        inProgressTask!.Status.Should().Be(TaskStatus.InProgress);
+    }
+
+    [Fact]
     public async Task GetTasksByStatus_ShouldReturnFilteredTasks()
     {
         // Arrange
@@ -262,6 +357,219 @@ public class TasksApiTests : IClassFixture<CustomWebApplicationFactory>, IDispos
         var tasks = await response.Content.ReadFromJsonAsync<List<TaskDto>>(_jsonOptions);
         tasks.Should().NotBeNull();
         tasks!.Should().OnlyContain(t => t.Status == TaskStatus.NotStarted);
+    }
+
+    [Fact]
+    public async Task CreateTask_WithMaxLengthTitle_ShouldSucceed()
+    {
+        // Arrange
+        var maxTitle = new string('A', 200); // Maximum allowed length
+        var createTaskDto = new CreateTaskDto
+        {
+            Title = maxTitle,
+            Description = "Description"
+        };
+
+        // Act
+        var response = await _client.PostAsJsonAsync("/api/v1/tasks", createTaskDto);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        var task = await response.Content.ReadFromJsonAsync<TaskDto>(_jsonOptions);
+        task!.Title.Should().Be(maxTitle);
+    }
+
+    [Fact]
+    public async Task CreateTask_WithTitleExceedingMaxLength_ShouldFail()
+    {
+        // Arrange
+        var tooLongTitle = new string('A', 201); // Exceeds maximum
+        var createTaskDto = new CreateTaskDto
+        {
+            Title = tooLongTitle,
+            Description = "Description"
+        };
+
+        // Act
+        var response = await _client.PostAsJsonAsync("/api/v1/tasks", createTaskDto);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task CreateTask_WithMaxLengthDescription_ShouldSucceed()
+    {
+        // Arrange
+        var maxDescription = new string('A', 1000); // Maximum allowed length
+        var createTaskDto = new CreateTaskDto
+        {
+            Title = "Valid Title",
+            Description = maxDescription
+        };
+
+        // Act
+        var response = await _client.PostAsJsonAsync("/api/v1/tasks", createTaskDto);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+    }
+
+    [Fact]
+    public async Task CreateTask_WithDescriptionExceedingMaxLength_ShouldFail()
+    {
+        // Arrange
+        var tooLongDescription = new string('A', 1001); // Exceeds maximum
+        var createTaskDto = new CreateTaskDto
+        {
+            Title = "Valid Title",
+            Description = tooLongDescription
+        };
+
+        // Act
+        var response = await _client.PostAsJsonAsync("/api/v1/tasks", createTaskDto);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task CreateTask_WithPastDueDate_ShouldFail()
+    {
+        // Arrange
+        var createTaskDto = new CreateTaskDto
+        {
+            Title = "Valid Title",
+            Description = "Description",
+            DueDate = DateTime.UtcNow.AddDays(-1) // Past date
+        };
+
+        // Act
+        var response = await _client.PostAsJsonAsync("/api/v1/tasks", createTaskDto);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task GetTasksByStatus_WithInvalidStatus_ShouldReturnBadRequest()
+    {
+        // Arrange
+        var invalidStatus = 999; // Invalid status value
+
+        // Act
+        var response = await _client.GetAsync($"/api/v1/tasks/status/{invalidStatus}");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task UpdateTask_MaintainsOriginalStatus()
+    {
+        // Arrange
+        var createTaskDto = new CreateTaskDto { Title = "Original Task" };
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/tasks", createTaskDto);
+        var createdTask = await createResponse.Content.ReadFromJsonAsync<TaskDto>(_jsonOptions);
+
+        // Mark as completed
+        await _client.PatchAsync($"/api/v1/tasks/{createdTask!.Id}/complete", null);
+
+        var updateTaskDto = new UpdateTaskDto
+        {
+            Title = "Updated Title",
+            Description = "Updated Description"
+        };
+
+        // Act
+        var updateResponse = await _client.PutAsJsonAsync($"/api/v1/tasks/{createdTask.Id}", updateTaskDto);
+
+        // Assert
+        updateResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var updatedTask = await updateResponse.Content.ReadFromJsonAsync<TaskDto>(_jsonOptions);
+        updatedTask!.Status.Should().Be(Domain.Enums.TaskStatus.Completed); // Status should remain Completed
+        updatedTask.Title.Should().Be("Updated Title");
+    }
+
+    [Fact]
+    public async Task MarkTaskIncomplete_ShouldChangeStatusToNotStarted()
+    {
+        // Arrange
+        var createTaskDto = new CreateTaskDto { Title = "Task" };
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/tasks", createTaskDto);
+        var createdTask = await createResponse.Content.ReadFromJsonAsync<TaskDto>(_jsonOptions);
+
+        // Mark as completed first
+        await _client.PatchAsync($"/api/v1/tasks/{createdTask!.Id}/complete", null);
+
+        // Act
+        var response = await _client.PatchAsync($"/api/v1/tasks/{createdTask.Id}/incomplete", null);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var task = await response.Content.ReadFromJsonAsync<TaskDto>(_jsonOptions);
+        task!.Status.Should().Be(Domain.Enums.TaskStatus.NotStarted);
+    }
+
+    [Fact]
+    public async Task MarkTaskInProgress_ShouldChangeStatusFromAnyStatusToInProgress()
+    {
+        // Arrange
+        await CleanupDatabase();
+        var createTaskDto = new CreateTaskDto { Title = "Task" };
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/tasks", createTaskDto);
+        createResponse.EnsureSuccessStatusCode();
+        var createdTask = await createResponse.Content.ReadFromJsonAsync<TaskDto>(_jsonOptions);
+
+        // Verify initial status is NotStarted
+        createdTask!.Status.Should().Be(Domain.Enums.TaskStatus.NotStarted);
+
+        // Act - Mark as in progress
+        var inProgressResponse = await _client.PatchAsync($"/api/v1/tasks/{createdTask.Id}/inprogress", null);
+
+        // Assert
+        inProgressResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var inProgressTask = await inProgressResponse.Content.ReadFromJsonAsync<TaskDto>(_jsonOptions);
+        inProgressTask!.Status.Should().Be(Domain.Enums.TaskStatus.InProgress);
+
+        // Mark as completed
+        await _client.PatchAsync($"/api/v1/tasks/{createdTask.Id}/complete", null);
+
+        // Act - Mark as in progress again from Completed status
+        var inProgressFromCompletedResponse = await _client.PatchAsync($"/api/v1/tasks/{createdTask.Id}/inprogress", null);
+
+        // Assert
+        inProgressFromCompletedResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var taskFromCompleted = await inProgressFromCompletedResponse.Content.ReadFromJsonAsync<TaskDto>(_jsonOptions);
+        taskFromCompleted!.Status.Should().Be(Domain.Enums.TaskStatus.InProgress);
+    }
+
+    [Fact]
+    public async Task MarkTaskInProgress_ShouldUpdateUpdatedAtTimestamp()
+    {
+        // Arrange
+        await CleanupDatabase();
+        var createTaskDto = new CreateTaskDto { Title = "Task" };
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/tasks", createTaskDto);
+        createResponse.EnsureSuccessStatusCode();
+        var createdTask = await createResponse.Content.ReadFromJsonAsync<TaskDto>(_jsonOptions);
+        createdTask.Should().NotBeNull();
+        createdTask!.Id.Should().NotBeEmpty();
+
+        var originalUpdatedAt = createdTask.UpdatedAt;
+
+        // Wait a bit to ensure timestamp difference
+        await Task.Delay(100);
+
+        // Act
+        var response = await _client.PatchAsync($"/api/v1/tasks/{createdTask.Id}/inprogress", null);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var updatedTask = await response.Content.ReadFromJsonAsync<TaskDto>(_jsonOptions);
+        updatedTask.Should().NotBeNull();
+        var newUpdatedAt = updatedTask!.UpdatedAt;
+        newUpdatedAt.Should().BeAfter(originalUpdatedAt);
     }
 
     private async Task CleanupDatabase()

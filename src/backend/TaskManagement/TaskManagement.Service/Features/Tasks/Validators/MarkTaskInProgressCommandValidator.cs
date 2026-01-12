@@ -18,4 +18,3 @@ public class MarkTaskInProgressCommandValidator : AbstractValidator<MarkTaskInPr
             .WithMessage("Task ID is required.");
     }
 }
-
