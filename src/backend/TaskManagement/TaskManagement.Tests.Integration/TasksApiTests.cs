@@ -191,10 +191,17 @@ public class TasksApiTests : IClassFixture<CustomWebApplicationFactory>, IDispos
         };
 
         var createResponse = await _client.PostAsJsonAsync("/api/v1/tasks", createTaskDto);
+        createResponse.EnsureSuccessStatusCode();
         var createdTask = await createResponse.Content.ReadFromJsonAsync<TaskDto>(_jsonOptions);
+        createdTask.Should().NotBeNull();
+        createdTask!.Id.Should().NotBeEmpty();
+
+        // Verify task exists before deletion
+        var verifyResponse = await _client.GetAsync($"/api/v1/tasks/{createdTask.Id}");
+        verifyResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
         // Act
-        var response = await _client.DeleteAsync($"/api/v1/tasks/{createdTask!.Id}");
+        var response = await _client.DeleteAsync($"/api/v1/tasks/{createdTask.Id}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -508,8 +515,10 @@ public class TasksApiTests : IClassFixture<CustomWebApplicationFactory>, IDispos
     public async Task MarkTaskInProgress_ShouldChangeStatusFromAnyStatusToInProgress()
     {
         // Arrange
+        await CleanupDatabase();
         var createTaskDto = new CreateTaskDto { Title = "Task" };
         var createResponse = await _client.PostAsJsonAsync("/api/v1/tasks", createTaskDto);
+        createResponse.EnsureSuccessStatusCode();
         var createdTask = await createResponse.Content.ReadFromJsonAsync<TaskDto>(_jsonOptions);
 
         // Verify initial status is NotStarted
@@ -539,10 +548,14 @@ public class TasksApiTests : IClassFixture<CustomWebApplicationFactory>, IDispos
     public async Task MarkTaskInProgress_ShouldUpdateUpdatedAtTimestamp()
     {
         // Arrange
+        await CleanupDatabase();
         var createTaskDto = new CreateTaskDto { Title = "Task" };
         var createResponse = await _client.PostAsJsonAsync("/api/v1/tasks", createTaskDto);
+        createResponse.EnsureSuccessStatusCode();
         var createdTask = await createResponse.Content.ReadFromJsonAsync<TaskDto>(_jsonOptions);
         createdTask.Should().NotBeNull();
+        createdTask!.Id.Should().NotBeEmpty();
+
         var originalUpdatedAt = createdTask.UpdatedAt;
 
         // Wait a bit to ensure timestamp difference
